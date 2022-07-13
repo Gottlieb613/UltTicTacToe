@@ -2,6 +2,11 @@ import sys
 import pygame as pg
 
 from Board import *
+
+
+#Initializing pygame and the display
+pg.init()
+pg.display.set_caption('Ultimate Tic Tac Toe')
     
 #Global variables
 #   Can play around with the values   
@@ -9,19 +14,19 @@ line_width = 10
 tile_size = 50
 box_length = 3 * tile_size + 2 * line_width
 screen_size = 3 * box_length, 3 * box_length
-black = (255, 255, 255)
-red = (255, 0, 0)
 tile_font = pg.font.SysFont('Arial', 10)
-
-pg.init()
-pg.display.set_caption('Ultimate Tic Tac Toe')
 screen = pg.display.set_mode(screen_size)
 
 def draw_background():
-    screen.fill((0, 0, 0))
+    screen.fill(pg.Color("white"))
 
 def draw_box(xleft, ytop):
-    pg.draw.rect(screen, red, pg.Rect(xleft, ytop, box_length, box_length), 2)
+
+        #to figure out: why can i set the border to red but
+        #   not the inside fill?
+    pg.draw.rect(screen, pg.Color("blue"), pg.Rect(xleft, ytop, box_length, box_length), 2)
+    
+    #Not sure why the font 'is not initialized
     font = tile_font.render('Hello!', True, (255,0,0))
     screen.blit(font, (200, 100))
 
@@ -37,23 +42,7 @@ def game_loop():
             draw_box(i * box_length, j * box_length)
 
     pg.display.flip()
-
-'''
-def main():
-    pygame.init()
-    font = pygame.font.SysFont('Arial', 25)
-    screen_h = 1000
-    screen_w = 1000
-
-    win = pygame.display.set_mode((screen_w, screen_h))
-    win.fill((0, 0, 0))
-    pygame.display.set_caption("Ultimate Tic Tac Toe")
-
-    box_side = 10
-
-    b = Board()
-'''
-
+    
 
 while 1:
     game_loop()
