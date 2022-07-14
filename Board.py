@@ -120,3 +120,42 @@ print(b)
 
                 
     
+
+
+'''
+OLD CODE FOR CHECKING THAT A SPOT IS LEGAL
+this was when I had the row/col 2d arraysystem
+instead of the current box/tile tree system
+
+
+    def place_tile_full(self, row, col, player):
+        if (player < 1 or player > 2):
+            print("invalid player")
+            return False
+        
+        #if either is out of range, return False
+        if not (0 <= row, col <= 8):
+            print("coordinates out of range")
+            return False
+        
+        #already full spot
+        if not self.check_empty(row, col):
+            print("that spot is already full")
+            return False
+        
+        self.update(row, col, player)
+
+        #now check if that player completed the box
+        box_win = self.check_board_complete(row, col)
+        if box_win > 0:
+            print(f"Player {player} has completed the box!")
+            self.update_box(row, col, player)
+
+            #now check if that player won
+            full_win = self.check_box_board_complete(row, col)
+            if full_win > 0:
+                print(f"Player {player} has won the game!")
+                self.win = True
+
+        return True
+'''
