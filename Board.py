@@ -14,8 +14,25 @@ class Board:
     def __init__(self):
         self.boxes = [self.BoxNode() for i in range(9)]
         self.win = False
+        self.player = 1
     
-    def update(self, box, tile, new_val):
+    def get_player(self):
+        return self.player
+    
+    def next_player(self):
+        if self.player == 1:
+            self.player = 2
+        else:
+            player = 1
+
+    
+    def get_tile(self, box, tile):
+        return self.boxes[box].tiles[tile].player
+    
+    def get_box(self, box):
+        return self.boxes[box].player
+    
+    def update_tile(self, box, tile, new_val):
         self.boxes[box].tiles[tile].player = new_val
     
     def update_box(self, box, new_val):
@@ -78,6 +95,28 @@ class Board:
             next = self.next_tile(next[0], next[1])
 
         return rep
+    
+    def tile_box_to_board(box, tile):
+        x_box = box % 3
+        y_box = box // 3
+        x_tile = tile % 3
+        y_tile = tile // 3
+
+        x_board = 3 * x_box + x_tile
+        y_board = 3 * y_box + y_tile
+
+        return x_board, y_board
+    
+    def board_to_tile_box(x, y):
+        x_box = x // 3
+        y_box = y // 3
+        box = 3 * y_box + x_box
+
+        x_tile = x % 3
+        y_tile = y % 3
+        tile = 3 * y_tile + x_tile
+
+        return box, tile
 
     #The idea for this function is that it will return
     # the box, tile pair for the tile to the RIGHT
@@ -109,13 +148,6 @@ class Board:
                         return None
 
 
-
-b = Board()
-b.update(4, 2, 1)
-b.update(5, 1, 1)
-b.update(8, 4, 2)
-
-print(b)
 
 
                 
