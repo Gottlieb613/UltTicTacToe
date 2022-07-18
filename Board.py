@@ -15,6 +15,7 @@ class Board:
         self.boxes = [self.BoxNode() for i in range(9)]
         self.win = False
         self.player = 1
+        self.next_box = -1
     
     def get_player(self):
         return self.player
@@ -23,8 +24,7 @@ class Board:
         if self.player == 1:
             self.player = 2
         else:
-            player = 1
-
+            self.player = 1
     
     def get_tile(self, box, tile):
         return self.boxes[box].tiles[tile].player
@@ -32,46 +32,65 @@ class Board:
     def get_box(self, box):
         return self.boxes[box].player
     
+    def get_next_box(self):
+        return self.next_box
+    
     def update_tile(self, box, tile, new_val):
         self.boxes[box].tiles[tile].player = new_val
     
     def update_box(self, box, new_val):
         self.boxes[box].player = new_val
 
-    def check_empty(self, box, tile):
-        return self.boxes[box][tile].player == 0
+    def check_empty_tile(self, box, tile):
+        has_empty_space = False
+        for i in range(9):
+            if self.boxes[box].tiles[i] != 0:
+                has_empty_space = True
+                break
+        
+        return self.boxes[box].tiles[tile].player == 0 and has_empty_space
     
+    def check_empty_box(self, box):
+        return self.boxes[box].player == 0
+    
+    def check_next_box(self, box):
+        return (box == self.next_box or self.next_box == -1)
+
     def check_box_accessible(self, box):
         if self.boxes[box].player != 0: #if this has been 'completed'
-            return True
+            return False
 
         for tile in self.boxes[box].tiles:
             if (tile.player == 0): #if there is at least one empty tile
-                return False
-        return True #if no empty tiles then it is full
+                return True
+        return False #if no empty tiles then it is full
 
     def check_box_complete(self, box):
-        return self.check_complete_helper(self, box)
+        return self.check_complete_helper(self.boxes[box].tiles)
 
     def check_board_complete(self):
-        return self.check_complete_helper(self, self.boxes)
+        return self.check_complete_helper(self.boxes)
 
     def check_complete_helper(self, box):
+        print("test")
+        
         for i in range(3):
 
             #checking each row (compare 012, 345, and 678)
                 #using t as temp var to shorten the expression
             t = 3 * i
-            if (box[t].player == box[t + 1].player == box[t + 2].player):
+            if (box[t].player != 0 and box[t].player == box[t + 1].player == box[t + 2].player):
                 return box[t].player
 
             #checking each col (compare 036, 147, and 258)
-            if (box[i].player == box[i + 3].player == box[i + 6].player):
+            if (box[i].player != 0 and box[i].player == box[i + 3].player == box[i + 6].player):
                 return box[i].player
 
         #manually checking both diagonals
         middle = box[4].player
-        if (box[0].player == middle == box[8].player or box[2].player  == middle == box[6].player):
+        if (middle != 0 and 
+            (box[0].player == middle == box[8].player 
+            or box[2].player == middle == box[6].player) ):
             return middle
 
         #no wins found so return 0
@@ -96,6 +115,12 @@ class Board:
 
         return rep
     
+    def print_boxes(self):
+        for i in range(9):
+            print(str(self.boxes[i].player), end="")
+            if (i % 3 == 2):
+                print()
+    
     def tile_box_to_board(box, tile):
         x_box = box % 3
         y_box = box // 3
@@ -117,6 +142,51 @@ class Board:
         tile = 3 * y_tile + x_tile
 
         return box, tile
+
+    def place_tile_full(self, box, tile, player):
+        if (player < 1 or player > 2):
+            print(f"{player}: invalid player")
+            return False
+        
+        #if either is out of range, return False
+        if not (0 <= box, tile <= 8):
+            print(f"{box}, {tile}: coordinates out of range")
+            return False
+        
+        #already full spot
+        if not self.check_empty_tile(box, tile):
+            print(f"{box}, {tile}: that spot is already full")
+            return False
+        
+        #not in the designated next box
+        if not self.check_next_box(box) or not self.check_box_accessible(box):
+            print(f"{box}: Cannot go in that box, instead go in {self.next_box}")
+            return False
+        
+        self.update_tile(box, tile, player)
+        #now update next_box, but only if the box the player
+            # should go to is accessible (i.e. not full or finished)
+        if self.check_box_accessible(tile):
+            self.next_box = tile
+        else:
+            self.next_box = -1
+
+        #now check if that player completed the box
+        box_win = self.check_box_complete(box)
+        if box_win > 0:
+            print(f"Player {player} has completed the box {box}!")
+            self.update_box(box, player)
+            #if the 'next box' is now completed, then force it to -1
+            if self.next_box == box:
+                self.next_box = -1
+
+            #now check if that player won
+            full_win = self.check_board_complete()
+            if full_win > 0:
+                print(f"Player {player} has won the game!")
+                self.win = True
+
+        return True
 
     #The idea for this function is that it will return
     # the box, tile pair for the tile to the RIGHT
@@ -146,48 +216,3 @@ class Board:
                     
                     else: #literally ONLY the bottom right tile of bottom right box, so end here
                         return None
-
-
-
-
-                
-    
-
-
-'''
-OLD CODE FOR CHECKING THAT A SPOT IS LEGAL
-this was when I had the row/col 2d arraysystem
-instead of the current box/tile tree system
-
-
-    def place_tile_full(self, row, col, player):
-        if (player < 1 or player > 2):
-            print("invalid player")
-            return False
-        
-        #if either is out of range, return False
-        if not (0 <= row, col <= 8):
-            print("coordinates out of range")
-            return False
-        
-        #already full spot
-        if not self.check_empty(row, col):
-            print("that spot is already full")
-            return False
-        
-        self.update(row, col, player)
-
-        #now check if that player completed the box
-        box_win = self.check_board_complete(row, col)
-        if box_win > 0:
-            print(f"Player {player} has completed the box!")
-            self.update_box(row, col, player)
-
-            #now check if that player won
-            full_win = self.check_box_board_complete(row, col)
-            if full_win > 0:
-                print(f"Player {player} has won the game!")
-                self.win = True
-
-        return True
-'''
