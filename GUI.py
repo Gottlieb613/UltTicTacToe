@@ -9,15 +9,15 @@ pg.display.set_caption('Ultimate Tic Tac Toe')
 DEBUG = False
 
 #Global variables
-#   Can play around with the values of line_width and tile_font
+#   Can play around with the value of line_width
 line_width = 4
 tile_length = 50
 box_length = 3 * tile_length + 2 * line_width
 screen_length = 9 * tile_length + 10 * line_width
-tile_font = pg.font.SysFont('Arial', 10)
 screen = pg.display.set_mode((screen_length, screen_length))
 was_pressed = False
 last_box_tile = None
+board = None
 
 #Global colors
 color_background = pg.Color("white")
@@ -77,7 +77,7 @@ def draw_all(board):
     draw_fill_last_tile()
     draw_lines()
 
-        #draw tile x's and o's
+    #draw tile x's and o's
     for i in range(9):
         for j in range(9):
             symbol = board.get_tile(i, j)
@@ -86,7 +86,7 @@ def draw_all(board):
             elif symbol == 2:
                 draw_symbol(i, j, "circle")
         
-        #draw box x's and o's
+    #draw box x's and o's
         symbol_big = board.get_box(i)
         if symbol_big == 1:
             draw_symbol(i, 0, "cross_big")
@@ -94,7 +94,7 @@ def draw_all(board):
             draw_symbol(i, 0, "circle_big")
 
 def write_message(message):
-    pg.display.set_caption(f'Ultimate Tic Tac Toe: {message}')
+    pg.display.set_caption(f'Ultimate Tic Tac Toe | {message}')
 
 def get_box_coords(box):
     return get_tile_coords(box, 0)
@@ -114,7 +114,7 @@ def get_coords_tile(x, y):
 
     return Board.board_to_tile_box(x_board, y_board)
 
-def game_loop(board):
+def game_loop():
     #exiting
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -132,43 +132,53 @@ def game_loop(board):
 
     elif not pg.mouse.get_pressed()[0] and was_pressed: #run on release of mouse
         was_pressed = False
-        mouse_x, mouse_y = pg.mouse.get_pos()
-        mouse_box, mouse_tile = get_coords_tile(mouse_x, mouse_y)
+
+        if board.win:
+            reset()
         
-        if DEBUG: print(f"box: {mouse_box}, tile: {mouse_tile}"); print(f"x: {mouse_x}, y: {mouse_y}")
-
-        if board.place_tile_full(mouse_box, mouse_tile, board.get_player()):
-            global last_box_tile
-            last_box_tile = (mouse_box, mouse_tile)
-
-            if DEBUG: print(board); board.print_boxes()
-
-            if board.win:
-                write_message(f"{board.get_player_symbol()} wins!")
-                #TODO: add a play again selection, and reset board and the other variables
-                    # would prob need to add a board_reset function in Board.py
-        
-            else:
-                #switch player
-                board.next_player()
-                write_message(f"Good spot! {board.get_player_symbol()}'s turn.")
         else:
-            write_message(f"Illegal move, try again. {board.get_player_symbol()}'s turn.")
+            mouse_x, mouse_y = pg.mouse.get_pos()
+            mouse_box, mouse_tile = get_coords_tile(mouse_x, mouse_y)
+            
+            if DEBUG: print(f"box: {mouse_box}, tile: {mouse_tile}"); print(f"x: {mouse_x}, y: {mouse_y}")
 
+            if board.place_tile_full(mouse_box, mouse_tile, board.get_player()):
+                global last_box_tile
+                last_box_tile = (mouse_box, mouse_tile)
 
+                if DEBUG: print(board); board.print_boxes()
 
-    # font = tile_font.render('Hello!', True, pg.Color("black"))
-    # screen.blit(font, get_tile_coords(5, 4))
+                if board.win:
+                    write_message(f"{board.get_player_symbol()} wins! Click to restart")
+                    pg.display.flip()
+                    #TODO: add a play again selection, and reset board and the other variables
+                        # would prob need to add a board_reset function in Board.py
+            
+                if not board.win:
+                    #switch player
+                    board.next_player()
+                    write_message(f"Good spot! {board.get_player_symbol()}'s turn.")
+            else:
+                write_message(f"Illegal move, try again. {board.get_player_symbol()}'s turn.")
 
     pg.display.flip()
+
+def reset():
+    board.reset_board()
+    write_message("X begins")
+    global last_box_tile
+    last_box_tile = None
+
+
     
 
 def main():
+    global board
     board = Board()
     clock = pg.time.Clock()
 
     while 1:
-        game_loop(board)
+        game_loop()
         clock.tick(20)
 
 if __name__ == "__main__": 

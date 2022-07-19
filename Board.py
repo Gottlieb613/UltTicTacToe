@@ -188,6 +188,7 @@ class Board:
             if full_win > 0:
                 print(f"Player {player} has won the game!")
                 self.win = True
+                self.next_box = -2
 
         return True
 
@@ -219,3 +220,13 @@ class Board:
                     
                     else: #literally ONLY the bottom right tile of bottom right box, so end here
                         return None
+
+    def reset_board(self):
+        for i in range(9):
+            self.update_box(i, 0)
+            for j in range(9): 
+                self.update_tile(i, j, 0)
+        
+        self.win = False
+        self.player = 1
+        self.next_box = -1
