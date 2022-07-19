@@ -15,10 +15,15 @@ class Board:
         self.boxes = [self.BoxNode() for i in range(9)]
         self.win = False
         self.player = 1
+            #Note: 1 = cross (X), 2 = circle (O)
         self.next_box = -1
     
     def get_player(self):
         return self.player
+    
+    def get_player_symbol(self):
+        symbs = [None, "X", "O"]
+        return symbs[self.player]
     
     def next_player(self):
         if self.player == 1:
@@ -71,9 +76,7 @@ class Board:
     def check_board_complete(self):
         return self.check_complete_helper(self.boxes)
 
-    def check_complete_helper(self, box):
-        print("test")
-        
+    def check_complete_helper(self, box):        
         for i in range(3):
 
             #checking each row (compare 012, 345, and 678)
